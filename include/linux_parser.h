@@ -45,7 +45,9 @@ long Jiffies();
 long ActiveJiffies();
 long ActiveJiffies(int pid);
 long IdleJiffies();
-
+// my helpers
+std::map<std::string, std::string> UtilMap1(std::string fname, char delim);
+std::string UtilGetVal1(std::string fname,char delim, std::string key);
 // Processes
 std::string Command(int pid);
 std::string Ram(int pid);
