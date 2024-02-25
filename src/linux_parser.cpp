@@ -3,13 +3,16 @@
 #include <dirent.h>
 #include <unistd.h>
 
+#include <filesystem>
+#include <iostream>
 #include <string>
 #include <vector>
-
+#include <cmath>
 using std::stof;
 using std::string;
 using std::to_string;
 using std::vector;
+using namespace LinuxParser;
 
 // DONE: An example of how to read data from the filesystem
 string LinuxParser::OperatingSystem() {
@@ -46,24 +49,37 @@ string LinuxParser::Kernel() {
   }
   return kernel;
 }
-
-// BONUS: Update this to use std::filesystem
+namespace fs = std::filesystem;
+// DONE: Update this to use std::filesystem
 vector<int> LinuxParser::Pids() {
   vector<int> pids;
-  DIR* directory = opendir(kProcDirectory.c_str());
-  struct dirent* file;
-  while ((file = readdir(directory)) != nullptr) {
-    // Is this a directory?
-    if (file->d_type == DT_DIR) {
-      // Is every character of the name a digit?
-      string filename(file->d_name);
-      if (std::all_of(filename.begin(), filename.end(), isdigit)) {
-        int pid = stoi(filename);
+  /*  DIR* directory = opendir(kProcDirectory.c_str());
+   struct dirent* file;
+   while ((file = readdir(directory)) != nullptr) {
+     // Is this a directory?
+     if (file->d_type == DT_DIR) {
+       // Is every character of the name a digit?
+       string filename(file->d_name);
+       if (std::all_of(filename.begin(), filename.end(), isdigit)) {
+         int pid = stoi(filename);
+         pids.push_back(pid);
+       }
+     }
+   }
+   closedir(directory); */
+  std::string directoryPath = kProcDirectory;
+  std::string dirname;
+  // Iterate through the directory
+  for (const auto& entry : fs::directory_iterator(directoryPath)) {
+    // Check if the current entry is a directory
+    if (fs::is_directory(entry)) {
+      dirname = entry.path().filename().string();
+      if (std::all_of(dirname.begin(), dirname.end(), isdigit)) {
+        int pid = stoi(dirname);
         pids.push_back(pid);
       }
     }
   }
-  closedir(directory);
   return pids;
 }
 
@@ -106,17 +122,17 @@ long LinuxParser::UpTime() {
   return uptime;
 }
 
-// TODO: Read and return the number of jiffies for the system
+// CANCELLED: NO NEED: Read and return the number of jiffies for the system
 long LinuxParser::Jiffies() { return 0; }
 
-// TODO: Read and return the number of active jiffies for a PID
+// CANCELLED: NO NEED Read and return the number of active jiffies for a PID
 // REMOVE: [[maybe_unused]] once you define the function
 long LinuxParser::ActiveJiffies(int pid [[maybe_unused]]) { return 0; }
 
-// TODO: Read and return the number of active jiffies for the system
+// CANCELLED: NO NEED: Read and return the number of active jiffies for the system
 long LinuxParser::ActiveJiffies() { return 0; }
 
-// TODO: Read and return the number of idle jiffies for the system
+// CANCELLED: NO NEED: Read and return the number of idle jiffies for the system
 long LinuxParser::IdleJiffies() { return 0; }
 
 // DONE: Read and return CPU utilization
@@ -207,22 +223,237 @@ int LinuxParser::RunningProcesses() {
   return procs;
 }
 
-// TODO: Read and return the command associated with a process
+// DONE: Read and return the command associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Command(int pid [[maybe_unused]]) { return string(); }
+string LinuxParser::Command(int pid) {
+  std::string fpath;
+  fpath = kProcDirectory + std::to_string(pid) + kCmdlineFilename;
+  string cmd;
+  // check proc exist
+  if (fs::exists(fpath)) {
+    std::ifstream iss(fpath);
+    for (std::string line; std::getline(iss, line);) {
+      cmd = cmd + line + " ";
+    }
 
-// TODO: Read and return the memory used by a process
-// REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Ram(int pid [[maybe_unused]]) { return string(); }
+  } else {
+    std::clog << "Command: no proc:" << pid << "\n";
+  }
 
-// TODO: Read and return the user ID associated with a process
-// REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Uid(int pid [[maybe_unused]]) { return string(); }
+  return cmd;
+}
 
-// TODO: Read and return the user associated with a process
-// REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::User(int pid [[maybe_unused]]) { return string(); }
+// auto LinuxParser::UtilStr2Num(string s)
+// // template <typename Type> Type LinuxParser::UtilStr2Num(string s) { return
+// a + b; }
+// {
+//   std::string output =
+//         std::regex_replace(s, std::regex("([0-9]+).*"), std::string("$1"));
 
-// TODO: Read and return the uptime of a process
+// }
+// DONE: Read and return the memory used by a process
 // REMOVE: [[maybe_unused]] once you define the function
-long LinuxParser::UpTime(int pid [[maybe_unused]]) { return 0; }
+long LinuxParser::Ram(int pid) {
+  std::string fpath;
+  fpath = kProcDirectory + std::to_string(pid) + kStatusFilename;
+  string vmSize = "";
+  long vmS_i;
+
+  if (fs::exists(fpath)) {
+    vmSize = UtilGetVal1(fpath, ':', "VmSize");
+    vmS_i = long(round(stoi(vmSize) * 0.001));
+
+  } else {
+    std::clog << "Ram: no proc:" << pid << "\n";
+  }
+
+  // std::vector<string> vstr = UtilParseStr2Vec(uid_str, '\t');
+
+  // return string(vstr[0]);
+
+  return vmS_i;
+}
+
+// DONE: Read and return the user ID associated with a process
+// REMOVE: [[maybe_unused]] once you define the function
+int LinuxParser::getUid(int pid)
+{
+  std::string fpath;
+  fpath = kProcDirectory + std::to_string(pid) + kStatusFilename;
+  int uid;
+  if (fs::exists(fpath)) {
+    std::string uid_str = UtilGetVal1(fpath, ':', "Uid");
+    std::vector<string> vstr = UtilParseStr2Vec(uid_str, '\t');
+    uid = stoi(vstr[0]);
+  } else {
+    std::clog << "Uid: no proc:" << pid << "\n";
+  }
+  return uid;
+
+}
+
+string LinuxParser::Uid(int pid, mpIntInt_t mpPidUid ) {
+  // std::string fpath;
+  // fpath = kProcDirectory + std::to_string(pid) + kStatusFilename;
+  string uid_s = "";
+  if (mpPidUid.count(pid) > 0) {
+    int uid=mpPidUid[pid];
+    uid_s = to_string(uid);
+    // std::string uid_str = UtilGetVal1(fpath, ':', "Uid");
+    // std::vector<string> vstr = UtilParseStr2Vec(uid_str, '\t');
+    // uid = vstr[0];
+  } else {
+    std::clog << "Uid: no proc:" << pid << "\n";
+    uid_s = "NA";
+  }
+  return uid_s;
+}
+
+mpIntInt_t LinuxParser::GetMapPidUid(vInt_t pids) {
+  mpIntInt_t m;
+  string uid_s;
+  int uid_int;
+  for (int pid : pids) {
+    uid_int = getUid(pid);
+    m[pid] = uid_int;
+  }
+  return m;
+}
+
+mpIntStr_t LinuxParser::GetMapUidUsrName() {
+  std::string fpath;
+  fpath = kPasswordPath;
+
+  mpStrStr_t m0 = UtilMap1(fpath, ':');
+  mpIntStr_t m1;
+  vector<string> tmpVec;
+  string uid_s;
+  int uid_int;
+  for (const auto& [key, value] : m0) {
+    tmpVec = UtilParseStr2Vec(value, ':');
+    uid_s = tmpVec[1];
+    uid_int = std::stoi(uid_s);
+    m1[uid_int] = key;
+  }
+  return m1;
+}
+
+mpIntStr_t LinuxParser::GetMapPidUsrName(vInt_t pids, mpIntInt_t mPidUid,
+                            mpIntStr_t mUidUsr) {
+  mpIntStr_t m;
+  int uid_int;
+  string usr;
+  for (int pid : pids) {
+    uid_int = mPidUid[pid];
+    usr = mUidUsr[uid_int];
+    m[pid] = usr;
+  }
+  return m;
+}
+// DONE: Read and return the user associated with a process
+string LinuxParser::User(int pid, mpIntStr_t mpPidUsr) {
+   std::string usr;
+  if (mpPidUsr.count(pid) > 0) {
+    usr = mpPidUsr[pid];
+  } else {
+    throw std::invalid_argument("can't find key, default value would be used");
+    usr = "USR_NOT_FOUND";
+  }
+  return usr;
+}
+  /* std::string fpath;
+  fpath = kPasswordPath;
+
+  std::map<std::string, std::string> m0 = UtilMap1(fpath, ':');
+  std::map<int, std::string> m1;
+  vector<string> tmpVec;
+  string uid_s;
+  int uid_int;
+  for (const auto& [key, value] : m0) {
+    tmpVec = UtilParseStr2Vec(value, ':');
+    uid_s = tmpVec[1];
+    uid_int = std::stoi(uid_s);
+    m1[uid_int] = key;
+
+    // cout << key << ":" << value << "\n";
+  }
+  // preproc map to invert it and map uid -> UserName
+
+  // try to get user name
+  uid_s = Uid(pid);
+  uid_int = std::stoi(uid_s);
+  std::string usr{"NA"}; 
+ 
+  // std::string uid_str = UtilGetVal1(fpath, ':', "Uid");
+  // std::vector<string> vstr = UtilParseStr2Vec(uid_str, '\t');
+
+  // return string(vstr[0]);
+*/
+
+
+/* void LinuxParser::GetLinuxParseMaps(vInt_t pids)
+// fill maps
+{
+  // mapUidUsrName = {};
+  //  mapUidUsrName = LinuxParser::GetMapUidUsrName();
+  // LinuxParser::mapPidUid = LinuxParser::GetMapPidUid(pids);
+  // LinuxParser::mapPidUser =
+  // LinuxParser::GetMapPidUsrName(pids, mapPidUid, mapUidUsrName);  // maps
+  // pid->UserName
+} */
+
+// TODO: finish it with jiffies, see comment from
+// https://stackoverflow.com/questions/16726779/how-do-i-get-the-total-cpu-usage-of-an-application-from-proc-pid-stat/16736599#16736599
+float LinuxParser::ProcCpuUtil(int pid, long systemUptime ) { 
+   std::string fpath;
+  fpath = kProcDirectory + std::to_string(pid) + kStatFilename;
+  // check proc exist
+  float cpu_usage=0;
+  if (fs::exists(fpath)) {
+    std::string s = UtilGetVal1(fpath, ' ', to_string(pid));
+    vector<string> v = UtilParseStr2Vec(s, ' ');
+    long utime = stoi(v[12]);
+    long stime = stoi(v[13]);
+    long cutime = stoi(v[14]);
+    long cstime = stoi(v[15]);
+    long starttime  = stoi(v[20]);
+    long Hertz = sysconf(_SC_CLK_TCK);
+    long total_time = utime + stime;
+    total_time = total_time + cutime + cstime;
+    long seconds = systemUptime - (starttime / Hertz);
+    cpu_usage = 100 * (float(total_time / Hertz) / seconds);
+  } else {
+    std::clog << "UpTime: no proc:" << pid << "\n";
+  }
+
+  
+  return cpu_usage; }
+
+// DONE: Read and return the uptime of a process
+// REMOVE: [[maybe_unused]] once you define the function
+long LinuxParser::UpTime(int pid) {
+  std::string fpath;
+  fpath = kProcDirectory + std::to_string(pid) + kStatFilename;
+  long uptime;
+  // check proc exist
+  if (fs::exists(fpath)) {
+    std::string s = UtilGetVal1(fpath, ' ', to_string(pid));
+    vector<string> v = UtilParseStr2Vec(s, ' ');
+    uptime = stoi(v[20]);
+    uptime = uptime / sysconf(_SC_CLK_TCK);
+  } else {
+    std::clog << "UpTime: no proc:" << pid << "\n";
+  }
+
+  return uptime;
+}
+
+vector<string> LinuxParser::UtilParseStr2Vec(string s, char delim) {
+  vector<string> vstrings;
+  std::stringstream ss(s);
+  std::string tmp;
+  while (getline(ss, tmp, delim)) {
+    vstrings.push_back(tmp);
+  }
+  return vstrings;
+}

@@ -18,6 +18,26 @@ const std::string kVersionFilename{"/version"};
 const std::string kOSPath{"/etc/os-release"};
 const std::string kPasswordPath{"/etc/passwd"};
 
+// my helpers
+typedef std::map<int, std::string> mpIntStr_t;
+typedef std::map<std::string, std::string> mpStrStr_t;
+typedef std::map<int, int> mpIntInt_t;
+typedef std::vector<int> vInt_t;
+typedef std::vector<std::string> vStr_t;
+mpStrStr_t UtilMap1(std::string fname, char delim);
+std::string UtilGetVal1(std::string fname,char delim, std::string key);
+vStr_t UtilParseStr2Vec(std::string s, char delim);
+mpIntStr_t GetMapUidUsrName();
+mpIntInt_t GetMapPidUid(vInt_t pids);
+mpIntStr_t GetMapPidUsrName(vInt_t pids, mpIntInt_t mUid,mpIntStr_t mUidUsr);
+// maps for processing proc
+// mpIntStr_t mapUidUsrName = {};
+// extern mpIntInt_t mapPidUid;x
+// extern mpIntStr_t mapPidUser;
+//void GetLinuxParseMaps(vInt_t pids);
+
+
+
 // System
 float MemoryUtilization();
 long UpTime();
@@ -45,15 +65,18 @@ long Jiffies();
 long ActiveJiffies();
 long ActiveJiffies(int pid);
 long IdleJiffies();
-// my helpers
-std::map<std::string, std::string> UtilMap1(std::string fname, char delim);
-std::string UtilGetVal1(std::string fname,char delim, std::string key);
+
+
 // Processes
 std::string Command(int pid);
-std::string Ram(int pid);
-std::string Uid(int pid);
-std::string User(int pid);
+long Ram(int pid);
+std::string Uid(int pid, mpIntInt_t mpPidUid);
+std::string User(int pid, mpIntStr_t mpPidUsr);
+float ProcCpuUtil(int pid, long systemUptime);
 long int UpTime(int pid);
+int getUid(int pid);
+
+
 };  // namespace LinuxParser
 
 #endif
