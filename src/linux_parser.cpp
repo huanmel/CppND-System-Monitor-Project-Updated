@@ -264,7 +264,7 @@ long LinuxParser::Ram(int pid) {
 
   if (fs::exists(fpath)) {
     vmSize = UtilGetVal1(fpath, ':', "VmSize");
-    vmS_i = long(round(stoi(vmSize) * 0.001));
+    vmS_i = long(round(stof(vmSize) * 0.001));
 
   } else {
     // std::clog << "Ram: no proc:" << pid << "\n";
