@@ -5,6 +5,7 @@
 #include <regex>
 #include <string>
 
+
 namespace LinuxParser {
 // Paths
 const std::string kProcDirectory{"/proc/"};
@@ -70,8 +71,8 @@ long IdleJiffies();
 // Processes
 std::string Command(int pid);
 long Ram(int pid);
-std::string Uid(int pid, mpIntInt_t mpPidUid);
-std::string User(int pid, mpIntStr_t mpPidUsr);
+std::string Uid(int pid, mpIntInt_t   mpPidUid);
+std::string User(int pid, mpIntStr_t  mpPidUsr);
 float ProcCpuUtil(int pid, long systemUptime);
 long int UpTime(int pid);
 int getUid(int pid);

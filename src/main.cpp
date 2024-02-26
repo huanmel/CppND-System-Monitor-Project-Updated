@@ -4,6 +4,9 @@
 #include "linux_parser.h"
 #include "ncurses_display.h"
 #include "system.h"
+// #include "Logger.h"
+// #define LOGGER_OUTFILE_FOLDER "./log/"
+// #include "spdlog/spdlog.h"
 int main() {
   System system;
   NCursesDisplay::Display(system);

@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <cmath>
+
 using std::stof;
 using std::string;
 using std::to_string;
@@ -170,8 +171,9 @@ string LinuxParser::UtilGetVal1(string fname, char delim, string key) {
   if (m.count(key) > 0) {
     s = (m[key]);
   } else {
-    throw std::invalid_argument("can't find key, default value would be used");
+    // throw std::invalid_argument("can't find key, default value would be used");
     // throw waxrning("this is a warning");
+    s="NA";
   }
   return s;
 };
@@ -237,7 +239,8 @@ string LinuxParser::Command(int pid) {
     }
 
   } else {
-    std::clog << "Command: no proc:" << pid << "\n";
+    // std::clog << "Command: no proc:" << pid << "\n";
+    cmd = "NA";
   }
 
   return cmd;
@@ -257,14 +260,15 @@ long LinuxParser::Ram(int pid) {
   std::string fpath;
   fpath = kProcDirectory + std::to_string(pid) + kStatusFilename;
   string vmSize = "";
-  long vmS_i;
+  long vmS_i{0};
 
   if (fs::exists(fpath)) {
     vmSize = UtilGetVal1(fpath, ':', "VmSize");
     vmS_i = long(round(stoi(vmSize) * 0.001));
 
   } else {
-    std::clog << "Ram: no proc:" << pid << "\n";
+    // std::clog << "Ram: no proc:" << pid << "\n";
+
   }
 
   // std::vector<string> vstr = UtilParseStr2Vec(uid_str, '\t');
@@ -280,19 +284,20 @@ int LinuxParser::getUid(int pid)
 {
   std::string fpath;
   fpath = kProcDirectory + std::to_string(pid) + kStatusFilename;
-  int uid;
+  int uid{0};
   if (fs::exists(fpath)) {
     std::string uid_str = UtilGetVal1(fpath, ':', "Uid");
     std::vector<string> vstr = UtilParseStr2Vec(uid_str, '\t');
     uid = stoi(vstr[0]);
   } else {
-    std::clog << "Uid: no proc:" << pid << "\n";
+    // std::clog << "Uid: no proc:" << pid << "\n";
+
   }
   return uid;
 
 }
 
-string LinuxParser::Uid(int pid, mpIntInt_t mpPidUid ) {
+string LinuxParser::Uid(int pid, mpIntInt_t  mpPidUid ) {
   // std::string fpath;
   // fpath = kProcDirectory + std::to_string(pid) + kStatusFilename;
   string uid_s = "";
@@ -351,12 +356,12 @@ mpIntStr_t LinuxParser::GetMapPidUsrName(vInt_t pids, mpIntInt_t mPidUid,
   return m;
 }
 // DONE: Read and return the user associated with a process
-string LinuxParser::User(int pid, mpIntStr_t mpPidUsr) {
+string LinuxParser::User(int pid, mpIntStr_t   mpPidUsr) {
    std::string usr;
   if (mpPidUsr.count(pid) > 0) {
     usr = mpPidUsr[pid];
   } else {
-    throw std::invalid_argument("can't find key, default value would be used");
+    // throw std::invalid_argument("can't find key, default value would be used");
     usr = "USR_NOT_FOUND";
   }
   return usr;
@@ -420,10 +425,10 @@ float LinuxParser::ProcCpuUtil(int pid, long systemUptime ) {
     long Hertz = sysconf(_SC_CLK_TCK);
     long total_time = utime + stime;
     total_time = total_time + cutime + cstime;
-    long seconds = systemUptime - (starttime / Hertz);
-    cpu_usage = 100 * (float(total_time / Hertz) / seconds);
+    float seconds = float(systemUptime) - float(starttime / Hertz);
+    cpu_usage =  (float(total_time / Hertz) / seconds);
   } else {
-    std::clog << "UpTime: no proc:" << pid << "\n";
+    // std::clog << "UpTime: no proc:" << pid << "\n";
   }
 
   
@@ -434,7 +439,7 @@ float LinuxParser::ProcCpuUtil(int pid, long systemUptime ) {
 long LinuxParser::UpTime(int pid) {
   std::string fpath;
   fpath = kProcDirectory + std::to_string(pid) + kStatFilename;
-  long uptime;
+  long uptime{0};
   // check proc exist
   if (fs::exists(fpath)) {
     std::string s = UtilGetVal1(fpath, ' ', to_string(pid));
@@ -442,7 +447,7 @@ long LinuxParser::UpTime(int pid) {
     uptime = stoi(v[20]);
     uptime = uptime / sysconf(_SC_CLK_TCK);
   } else {
-    std::clog << "UpTime: no proc:" << pid << "\n";
+    // std::clog << "UpTime: no proc:" << pid << "\n";
   }
 
   return uptime;

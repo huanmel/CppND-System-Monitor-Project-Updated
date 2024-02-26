@@ -10,7 +10,7 @@ using std::string;
 using std::to_string;
 using std::vector;
 
-Process::Process(int pid, mpIntStr_t mpPidUsr, mpIntInt_t mpPidUid, long sysUptime): _pid{pid}
+Process::Process(int pid, mpIntStr_t const& mpPidUsr, mpIntInt_t const& mpPidUid, long sysUptime): _pid{pid}
 {
     
 _pUser = LinuxParser::User(pid, mpPidUsr);
@@ -22,29 +22,27 @@ _pUptime = LinuxParser::UpTime(pid);
 }
 
 // TODO: Return this process's ID
-int Process::Pid() {  return _pid; }
+int Process::Pid() const {  return _pid; }
 
 // TODO: Return this process's CPU utilization
-float Process::CpuUtilization() { return _pCpuutil; }
+float Process::CpuUtilization() const { return _pCpuutil; }
 
 // TODO: Return the command that generated this process
-string Process::Command() { return _pCommand; }
+string Process::Command() const { return _pCommand; }
 
-// TODO: Return this process's memory utilization
-string Process::Ram() { return to_string(_pRam); }
+// DONE: Return this process's memory utilization
+string Process::Ram() const { return to_string(_pRam); }
+long Process::RamInt() const { return (_pRam); }
 
 // TODO: Return the user (name) that generated this process
-string Process::User() { return _pUser; }
+string Process::User() const { return _pUser; }
 
 // TODO: Return the age of this process (in seconds)
-long int Process::UpTime() { return _pUptime; }
+long Process::UpTime() const { return _pUptime; }
 
 // DONE: Overload the "less than" comparison operator for Process objects
 // REMOVE: [[maybe_unused]] once you define the function
 bool Process::operator<(Process const& a) const {
      return _pCpuutil>a._pCpuutil; }
 
-// bool Process::compareProcMem(Process const& a, Process const& b) const
-//   {
-//     return a._pRam>b._pRam; 
-//   }
+

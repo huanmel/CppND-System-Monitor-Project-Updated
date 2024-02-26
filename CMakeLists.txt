@@ -9,6 +9,12 @@ include_directories(include)
 file(GLOB SOURCES "src/*.cpp")
 
 add_executable(monitor ${SOURCES})
+# target_include_directories(monitor PUBLIC thirdparty/simple_logger/include)
+# add_definitions( -D LOGGER_OUTFILE_FOLDER=".")
+# add_definitions( -D LOGGER_WRITE_OUTFILE=1)
+# target_include_directories(monitor PUBLIC thirdparty/spdlog)
+# target_link_libraries(monitor PRIVATE spdlog::spdlog_header_only)
+#include_directories(thirdparty/simple_logger/include)
 
 set_property(TARGET monitor PROPERTY CXX_STANDARD 17)
 target_link_libraries(monitor ${CURSES_LIBRARIES})

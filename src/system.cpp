@@ -17,7 +17,20 @@ using std::string;
 using std::vector;
 using namespace LinuxParser;
 // DONE: Return the system's CPU
-Processor& System::Cpu() { return cpu_; }
+Processor& System::Cpu() { 
+  cpu_ = Processor();
+  return cpu_; }
+
+bool compareProcMem(Process const& a, Process const& b)
+  {
+    return a.RamInt()>b.RamInt(); 
+  }
+
+  bool compareProcCpu(Process const& a, Process const& b)
+  {
+    return a.CpuUtilization()>b.CpuUtilization(); 
+  }
+
 
 // TODO: Return a container composed of the system's processes
 vector<Process>& System::Processes() {
@@ -37,7 +50,7 @@ vector<Process>& System::Processes() {
     processes_.push_back(p);
   }
 
-  sort(processes_.begin(),processes_.end());
+  sort(processes_.begin(),processes_.end(),compareProcMem);
 
   return processes_;
 }
@@ -46,21 +59,31 @@ vector<Process>& System::Processes() {
 
 // DONE: Return the system's kernel identifier (string)
 std::string System::Kernel() {
-  string kern = LinuxParser::Kernel();
-  return kern;
+  _kernel = LinuxParser::Kernel();
+  return _kernel;
 }
 
 // DONE Return the system's memory utilization
-float System::MemoryUtilization() { return LinuxParser::MemoryUtilization(); }
+float System::MemoryUtilization() { 
+  _memutil = LinuxParser::MemoryUtilization();
+  return _memutil; }
 
 // DONE : Return the operating system name
-std::string System::OperatingSystem() { return LinuxParser::OperatingSystem(); }
+std::string System::OperatingSystem() { 
+  _operatingsys =LinuxParser::OperatingSystem();
+  return _operatingsys; }
 
 // DONE: Return the number of processes actively running on the system
-int System::RunningProcesses() { return LinuxParser::RunningProcesses(); }
+int System::RunningProcesses() { 
+  _runningprocess = LinuxParser::RunningProcesses();
+  return _runningprocess;  
+  }
 
 // DONE: Return the total number of processes on the system
-int System::TotalProcesses() { return LinuxParser::TotalProcesses(); }
+int System::TotalProcesses() { 
+  _totalproc = LinuxParser::TotalProcesses();
+  return _totalproc;
+   }
 
 // DONE: Return the number of seconds since the system started running
 long int System::UpTime() { 

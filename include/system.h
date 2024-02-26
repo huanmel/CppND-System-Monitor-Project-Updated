@@ -17,12 +17,20 @@ class System {
   int RunningProcesses();             // DONE: See src/system.cpp
   std::string Kernel();               // DONE: See src/system.cpp
   std::string OperatingSystem();      // DONE: See src/system.cpp
+  // bool compareProcMem(Process const& a, Process const& b) const;
 
   // TODO: Define any necessary private members
  private:
   Processor cpu_ = {}; //DONE
   std::vector<Process> processes_ = {};
-  long _systemUptime;
+  long _systemUptime{0};
+  int _runningprocess{0};
+  int _totalproc{0};
+  float _memutil{0};
+  std::string _kernel;
+  std::string _operatingsys;
+   
+
 };
 
 #endif
