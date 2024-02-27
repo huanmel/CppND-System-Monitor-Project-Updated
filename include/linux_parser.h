@@ -26,6 +26,7 @@ typedef std::vector<int> vInt_t;
 typedef std::vector<std::string> vStr_t;
 mpStrStr_t UtilMap1(std::string fname, char delim);
 std::string UtilGetVal1(std::string fname, char delim, std::string key);
+std::string UtilGetVal2(std::string fname, char delim, std::string key);
 vStr_t UtilParseStr2Vec(std::string s, char delim);
 mpIntStr_t GetMapUidUsrName();
 mpIntInt_t GetMapPidUid(vInt_t pids);
@@ -51,7 +52,7 @@ enum CPUStates {
   kNice_,
   kSystem_,
   kIdle_,
-  kIOwait_,
+  kIOwait_, 
   kIRQ_,
   kSoftIRQ_,
   kSteal_,
@@ -70,7 +71,7 @@ long Ram(int pid);
 std::string Uid(int pid, mpIntInt_t const& mpPidUid);
 std::string User(int pid, mpIntStr_t const& mpPidUsr);
 float ProcCpuUtil(int pid, long systemUptime);
-long int UpTime(int pid);
+long int UpTime(int pid,  long systemUptime);
 int getUid(int pid);
 
 };  // namespace LinuxParser

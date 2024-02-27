@@ -92,19 +92,21 @@ float LinuxParser::MemoryUtilization() {
       UtilMap1(kProcDirectory + kMeminfoFilename, ':');
   // get values and process them
   // prepare lambda helper for it
-  auto proc_memstrval = [](std::string strval) {
+  /* auto proc_memstrval = [](std::string strval) {
     std::string output =
         std::regex_replace(strval, std::regex("([0-9]+).*"), std::string("$1"));
 
     int val = std::stoi(output);
     return val;
-  };
-  int memTotal = proc_memstrval(m["MemTotal"]);
-  int memFree = proc_memstrval(m["MemFree"]);
-  // int memAvailable=proc_memstrval(m["MemAvailable"]);
-  // int memBuffer=proc_memstrval(m["Buffers"]);
-  float memUtil = float(memTotal - memFree) / float(memTotal);
-
+  }; */
+  int memTotal = std::stoi(m["MemTotal"]);
+  int memFree = std::stoi(m["MemFree"]);
+  // int memAvailable=std::stoi(m["MemAvailable"]);
+  int memCached=std::stoi(m["Cached"]);
+  int memBuffer=std::stoi(m["Buffers"]);
+  float memUtil = float(memTotal - memFree);
+  memUtil = (memUtil - (memBuffer+memCached))  /(memTotal);
+ 
   // string value = UtilGetVal1(kProcDirectory + kMeminfoFilename, ' ',
   // "processes"); procs = std::stoi(value);
 
@@ -144,7 +146,7 @@ vector<string> LinuxParser::CpuUtilization() {
   vector<string> vstrings;
   string tmp;
   //  std::map<std::string, std::string> m = UtilMap1(fname, delim);
-  string s = UtilGetVal1(kProcDirectory + kStatFilename, ' ', "cpu");
+  string s = UtilGetVal2(kProcDirectory + kStatFilename, ' ', "cpu");
   std::stringstream ss(s);
   while (getline(ss, tmp, ' ')) {
     vstrings.push_back(tmp);
@@ -181,6 +183,19 @@ string LinuxParser::UtilGetVal1(string fname, char delim, string key) {
   return s;
 };
 
+string LinuxParser::UtilGetVal2(string fname, char delim, string key)
+// more economic, no need in map if we use one value at the output
+ {
+  
+  // std::string key, val;
+  std::ifstream iss(fname);
+  std::string lkey, val="NA";
+  while (std::getline(std::getline(iss, lkey, delim) >> std::ws, val))
+  { if (lkey==key) {break;}}
+  
+  return val;
+};
+
 // DONE: Read and return the total number of processes
 int LinuxParser::TotalProcesses() {
   int procs = 0;
@@ -188,7 +203,7 @@ int LinuxParser::TotalProcesses() {
   // string line;
   // string key;
   // string value;
-  string value = UtilGetVal1(kProcDirectory + kStatFilename, ' ', "processes");
+  string value = UtilGetVal2(kProcDirectory + kStatFilename, ' ', "processes");
   procs = std::stoi(value);
   return procs;
   /*   std::map<std::string, std::string> m =
@@ -266,7 +281,7 @@ long LinuxParser::Ram(int pid) {
   long vmS_i{0};
 
   if (fs::exists(fpath)) {
-    vmSize = UtilGetVal1(fpath, ':', "VmSize");
+    vmSize = UtilGetVal2(fpath, ':', "VmRSS"); //VmSize
     vmS_i = long((stof(vmSize) * 0.001));  // round
 
   } else {
@@ -419,7 +434,7 @@ float LinuxParser::ProcCpuUtil(int pid, long systemUptime) {
   // check proc exist
   float cpu_usage = 0;
   if (fs::exists(fpath)) {
-    std::string s = UtilGetVal1(fpath, ' ', to_string(pid));
+    std::string s = UtilGetVal2(fpath, ' ', to_string(pid));
     vector<string> v = UtilParseStr2Vec(s, ' ');
     long utime = stoi(v[12]);
     long stime = stoi(v[13]);
@@ -440,16 +455,16 @@ float LinuxParser::ProcCpuUtil(int pid, long systemUptime) {
 
 // DONE: Read and return the uptime of a process
 // REMOVE: [[maybe_unused]] once you define the function
-long LinuxParser::UpTime(int pid) {
+long LinuxParser::UpTime(int pid, long systemUptime) {
   std::string fpath;
   fpath = kProcDirectory + std::to_string(pid) + kStatFilename;
   long uptime{0};
   // check proc exist
   if (fs::exists(fpath)) {
-    std::string s = UtilGetVal1(fpath, ' ', to_string(pid));
+    std::string s = UtilGetVal2(fpath, ' ', to_string(pid));
     vector<string> v = UtilParseStr2Vec(s, ' ');
     uptime = stoi(v[20]);
-    uptime = uptime / sysconf(_SC_CLK_TCK);
+    uptime =systemUptime -  uptime / sysconf(_SC_CLK_TCK);
   } else {
     // std::clog << "UpTime: no proc:" << pid << "\n";
   }

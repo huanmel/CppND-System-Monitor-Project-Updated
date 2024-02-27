@@ -19,7 +19,7 @@ Process::Process(int pid, mpIntStr_t const& mpPidUsr,
   _pCommand = LinuxParser::Command(pid);
   _pCpuutil = LinuxParser::ProcCpuUtil(pid, sysUptime);
   _pRam = LinuxParser::Ram(pid);
-  _pUptime = LinuxParser::UpTime(pid);
+  _pUptime = LinuxParser::UpTime(pid, sysUptime);
 }
 
 // TODO: Return this process's ID

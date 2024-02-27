@@ -56,7 +56,7 @@ vector<Process>& System::Processes() {
     }
   }
 
-  sort(processes_.begin(), processes_.end(), compareProcMem);
+  sort(processes_.begin(), processes_.end(), compareProcCpu);
 
   return processes_;
 }
