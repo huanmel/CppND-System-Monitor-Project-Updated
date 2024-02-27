@@ -10,12 +10,13 @@
 #include "linux_parser.h"
 #include "process.h"
 #include "processor.h"
-
+#include <filesystem>
 using std::set;
 using std::size_t;
 using std::string;
 using std::vector;
 using namespace LinuxParser;
+namespace fs = std::filesystem;
 // DONE: Return the system's CPU
 Processor& System::Cpu() {
   cpu_ = Processor();
@@ -41,11 +42,17 @@ vector<Process>& System::Processes() {
       pids, mapPidUid, mapUidUsrName);  // maps pid->UserName
 
   processes_.clear();
+  std::string fpath;
 
   for (int pid : pids) {
-    Process p = Process(pid, mapPidUser, mapPidUid, _systemUptime);
+    fpath = kProcDirectory + std::to_string(pid) + kStatusFilename;
+    if (fs::exists(fpath)) // skip non existing pid directory
+     {
+      
+      Process p = Process(pid, mapPidUser, mapPidUid, _systemUptime);
 
-    processes_.push_back(p);
+      processes_.push_back(p);
+    }
   }
 
   sort(processes_.begin(), processes_.end(), compareProcMem);

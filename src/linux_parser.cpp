@@ -3,7 +3,7 @@
 #include <dirent.h>
 #include <unistd.h>
 
-#include <cmath>
+//#include <cmath>
 #include <filesystem>
 #include <iostream>
 #include <string>
@@ -265,7 +265,7 @@ long LinuxParser::Ram(int pid) {
 
   if (fs::exists(fpath)) {
     vmSize = UtilGetVal1(fpath, ':', "VmSize");
-    vmS_i = long(round(stof(vmSize) * 0.001));
+    vmS_i = long((stof(vmSize) * 0.001));//round
 
   } else {
     // std::clog << "Ram: no proc:" << pid << "\n";
@@ -294,12 +294,12 @@ int LinuxParser::getUid(int pid) {
   return uid;
 }
 
-string LinuxParser::Uid(int pid, mpIntInt_t mpPidUid) {
+string LinuxParser::Uid(int pid, mpIntInt_t const& mpPidUid) {
   // std::string fpath;
   // fpath = kProcDirectory + std::to_string(pid) + kStatusFilename;
   string uid_s = "";
   if (mpPidUid.count(pid) > 0) {
-    int uid = mpPidUid[pid];
+    int uid = mpPidUid.at(pid);
     uid_s = to_string(uid);
     // std::string uid_str = UtilGetVal1(fpath, ':', "Uid");
     // std::vector<string> vstr = UtilParseStr2Vec(uid_str, '\t');
@@ -353,10 +353,10 @@ mpIntStr_t LinuxParser::GetMapPidUsrName(vInt_t pids, mpIntInt_t mPidUid,
   return m;
 }
 // DONE: Read and return the user associated with a process
-string LinuxParser::User(int pid, mpIntStr_t mpPidUsr) {
+string LinuxParser::User(int pid, mpIntStr_t const& mpPidUsr) {
   std::string usr;
   if (mpPidUsr.count(pid) > 0) {
-    usr = mpPidUsr[pid];
+    usr = mpPidUsr.at(pid);
   } else {
     // throw std::invalid_argument("can't find key, default value would be
     // used");
