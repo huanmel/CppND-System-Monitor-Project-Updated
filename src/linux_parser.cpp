@@ -4,7 +4,6 @@
 #include <unistd.h>
 
 //#include <cmath>
-#include <filesystem>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -14,7 +13,10 @@ using std::string;
 using std::to_string;
 using std::vector;
 using namespace LinuxParser;
-
+#include <filesystem>
+namespace fs = std::filesystem;
+// #include <experimental/filesystem>
+// namespace fs = std::experimental::filesystem;
 // DONE: An example of how to read data from the filesystem
 string LinuxParser::OperatingSystem() {
   string line;
@@ -50,7 +52,7 @@ string LinuxParser::Kernel() {
   }
   return kernel;
 }
-namespace fs = std::filesystem;
+
 // DONE: Update this to use std::filesystem
 vector<int> LinuxParser::Pids() {
   vector<int> pids;
@@ -128,7 +130,7 @@ long LinuxParser::Jiffies() { return 0; }
 
 // CANCELLED: NO NEED Read and return the number of active jiffies for a PID
 // REMOVE: [[maybe_unused]] once you define the function
-long LinuxParser::ActiveJiffies(int pid [[maybe_unused]]) { return 0; }
+long LinuxParser::ActiveJiffies(int pid[[maybe_unused]]) { return 0; }
 
 // CANCELLED: NO NEED: Read and return the number of active jiffies for the
 // system
@@ -331,8 +333,13 @@ mpIntStr_t LinuxParser::GetMapUidUsrName() {
   vector<string> tmpVec;
   string uid_s;
   int uid_int;
-  for (const auto& [key, value] : m0) {
-    tmpVec = UtilParseStr2Vec(value, ':');
+  // for (const auto & [ key, value ] : m0) 
+   for (auto i=m0.begin(); i != m0.end(); i++)
+   {
+     std::string key = i->first;
+     std::string value = i->second;
+  
+     tmpVec = UtilParseStr2Vec(value, ':');
     uid_s = tmpVec[1];
     uid_int = std::stoi(uid_s);
     m1[uid_int] = key;
