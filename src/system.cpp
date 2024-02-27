@@ -3,6 +3,7 @@
 #include <unistd.h>
 
 #include <cstddef>
+#include <filesystem>
 #include <set>
 #include <string>
 #include <vector>
@@ -10,7 +11,6 @@
 #include "linux_parser.h"
 #include "process.h"
 #include "processor.h"
-#include <filesystem>
 using std::set;
 using std::size_t;
 using std::string;
@@ -46,9 +46,8 @@ vector<Process>& System::Processes() {
 
   for (int pid : pids) {
     fpath = kProcDirectory + std::to_string(pid) + kStatusFilename;
-    if (fs::exists(fpath)) // skip non existing pid directory
-     {
-      
+    if (fs::exists(fpath))  // skip non existing pid directory
+    {
       Process p = Process(pid, mapPidUser, mapPidUid, _systemUptime);
 
       processes_.push_back(p);
