@@ -52,8 +52,8 @@ float Processor::Utilization() {
   prevsoftirq = softirq;
   prevsteal = steal;
   IsInit = true;
-  
-  _utilization=procUtil;
+
+  _utilization = procUtil;
 
   return _utilization;
 }

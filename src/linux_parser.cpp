@@ -3,11 +3,11 @@
 #include <dirent.h>
 #include <unistd.h>
 
+#include <cmath>
 #include <filesystem>
 #include <iostream>
 #include <string>
 #include <vector>
-#include <cmath>
 
 using std::stof;
 using std::string;
@@ -130,7 +130,8 @@ long LinuxParser::Jiffies() { return 0; }
 // REMOVE: [[maybe_unused]] once you define the function
 long LinuxParser::ActiveJiffies(int pid [[maybe_unused]]) { return 0; }
 
-// CANCELLED: NO NEED: Read and return the number of active jiffies for the system
+// CANCELLED: NO NEED: Read and return the number of active jiffies for the
+// system
 long LinuxParser::ActiveJiffies() { return 0; }
 
 // CANCELLED: NO NEED: Read and return the number of idle jiffies for the system
@@ -171,9 +172,9 @@ string LinuxParser::UtilGetVal1(string fname, char delim, string key) {
   if (m.count(key) > 0) {
     s = (m[key]);
   } else {
-    // throw std::invalid_argument("can't find key, default value would be used");
-    // throw waxrning("this is a warning");
-    s="NA";
+    // throw std::invalid_argument("can't find key, default value would be
+    // used"); throw waxrning("this is a warning");
+    s = "NA";
   }
   return s;
 };
@@ -268,7 +269,6 @@ long LinuxParser::Ram(int pid) {
 
   } else {
     // std::clog << "Ram: no proc:" << pid << "\n";
-
   }
 
   // std::vector<string> vstr = UtilParseStr2Vec(uid_str, '\t');
@@ -280,8 +280,7 @@ long LinuxParser::Ram(int pid) {
 
 // DONE: Read and return the user ID associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
-int LinuxParser::getUid(int pid)
-{
+int LinuxParser::getUid(int pid) {
   std::string fpath;
   fpath = kProcDirectory + std::to_string(pid) + kStatusFilename;
   int uid{0};
@@ -291,18 +290,16 @@ int LinuxParser::getUid(int pid)
     uid = stoi(vstr[0]);
   } else {
     // std::clog << "Uid: no proc:" << pid << "\n";
-
   }
   return uid;
-
 }
 
-string LinuxParser::Uid(int pid, mpIntInt_t  mpPidUid ) {
+string LinuxParser::Uid(int pid, mpIntInt_t mpPidUid) {
   // std::string fpath;
   // fpath = kProcDirectory + std::to_string(pid) + kStatusFilename;
   string uid_s = "";
   if (mpPidUid.count(pid) > 0) {
-    int uid=mpPidUid[pid];
+    int uid = mpPidUid[pid];
     uid_s = to_string(uid);
     // std::string uid_str = UtilGetVal1(fpath, ':', "Uid");
     // std::vector<string> vstr = UtilParseStr2Vec(uid_str, '\t');
@@ -344,7 +341,7 @@ mpIntStr_t LinuxParser::GetMapUidUsrName() {
 }
 
 mpIntStr_t LinuxParser::GetMapPidUsrName(vInt_t pids, mpIntInt_t mPidUid,
-                            mpIntStr_t mUidUsr) {
+                                         mpIntStr_t mUidUsr) {
   mpIntStr_t m;
   int uid_int;
   string usr;
@@ -356,45 +353,45 @@ mpIntStr_t LinuxParser::GetMapPidUsrName(vInt_t pids, mpIntInt_t mPidUid,
   return m;
 }
 // DONE: Read and return the user associated with a process
-string LinuxParser::User(int pid, mpIntStr_t   mpPidUsr) {
-   std::string usr;
+string LinuxParser::User(int pid, mpIntStr_t mpPidUsr) {
+  std::string usr;
   if (mpPidUsr.count(pid) > 0) {
     usr = mpPidUsr[pid];
   } else {
-    // throw std::invalid_argument("can't find key, default value would be used");
+    // throw std::invalid_argument("can't find key, default value would be
+    // used");
     usr = "USR_NOT_FOUND";
   }
   return usr;
 }
-  /* std::string fpath;
-  fpath = kPasswordPath;
+/* std::string fpath;
+fpath = kPasswordPath;
 
-  std::map<std::string, std::string> m0 = UtilMap1(fpath, ':');
-  std::map<int, std::string> m1;
-  vector<string> tmpVec;
-  string uid_s;
-  int uid_int;
-  for (const auto& [key, value] : m0) {
-    tmpVec = UtilParseStr2Vec(value, ':');
-    uid_s = tmpVec[1];
-    uid_int = std::stoi(uid_s);
-    m1[uid_int] = key;
-
-    // cout << key << ":" << value << "\n";
-  }
-  // preproc map to invert it and map uid -> UserName
-
-  // try to get user name
-  uid_s = Uid(pid);
+std::map<std::string, std::string> m0 = UtilMap1(fpath, ':');
+std::map<int, std::string> m1;
+vector<string> tmpVec;
+string uid_s;
+int uid_int;
+for (const auto& [key, value] : m0) {
+  tmpVec = UtilParseStr2Vec(value, ':');
+  uid_s = tmpVec[1];
   uid_int = std::stoi(uid_s);
-  std::string usr{"NA"}; 
- 
-  // std::string uid_str = UtilGetVal1(fpath, ':', "Uid");
-  // std::vector<string> vstr = UtilParseStr2Vec(uid_str, '\t');
+  m1[uid_int] = key;
 
-  // return string(vstr[0]);
+  // cout << key << ":" << value << "\n";
+}
+// preproc map to invert it and map uid -> UserName
+
+// try to get user name
+uid_s = Uid(pid);
+uid_int = std::stoi(uid_s);
+std::string usr{"NA"};
+
+// std::string uid_str = UtilGetVal1(fpath, ':', "Uid");
+// std::vector<string> vstr = UtilParseStr2Vec(uid_str, '\t');
+
+// return string(vstr[0]);
 */
-
 
 /* void LinuxParser::GetLinuxParseMaps(vInt_t pids)
 // fill maps
@@ -409,11 +406,11 @@ string LinuxParser::User(int pid, mpIntStr_t   mpPidUsr) {
 
 // TODO: finish it with jiffies, see comment from
 // https://stackoverflow.com/questions/16726779/how-do-i-get-the-total-cpu-usage-of-an-application-from-proc-pid-stat/16736599#16736599
-float LinuxParser::ProcCpuUtil(int pid, long systemUptime ) { 
-   std::string fpath;
+float LinuxParser::ProcCpuUtil(int pid, long systemUptime) {
+  std::string fpath;
   fpath = kProcDirectory + std::to_string(pid) + kStatFilename;
   // check proc exist
-  float cpu_usage=0;
+  float cpu_usage = 0;
   if (fs::exists(fpath)) {
     std::string s = UtilGetVal1(fpath, ' ', to_string(pid));
     vector<string> v = UtilParseStr2Vec(s, ' ');
@@ -421,18 +418,18 @@ float LinuxParser::ProcCpuUtil(int pid, long systemUptime ) {
     long stime = stoi(v[13]);
     long cutime = stoi(v[14]);
     long cstime = stoi(v[15]);
-    long starttime  = stoi(v[20]);
+    long starttime = stoi(v[20]);
     long Hertz = sysconf(_SC_CLK_TCK);
     long total_time = utime + stime;
     total_time = total_time + cutime + cstime;
     float seconds = float(systemUptime) - float(starttime / Hertz);
-    cpu_usage =  (float(total_time / Hertz) / seconds);
+    cpu_usage = (float(total_time / Hertz) / seconds);
   } else {
     // std::clog << "UpTime: no proc:" << pid << "\n";
   }
 
-  
-  return cpu_usage; }
+  return cpu_usage;
+}
 
 // DONE: Read and return the uptime of a process
 // REMOVE: [[maybe_unused]] once you define the function

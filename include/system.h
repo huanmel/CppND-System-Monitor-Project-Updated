@@ -21,7 +21,7 @@ class System {
 
   // TODO: Define any necessary private members
  private:
-  Processor cpu_ = {}; //DONE
+  Processor cpu_ = {};  // DONE
   std::vector<Process> processes_ = {};
   long _systemUptime{0};
   int _runningprocess{0};
@@ -29,8 +29,6 @@ class System {
   float _memutil{0};
   std::string _kernel;
   std::string _operatingsys;
-   
-
 };
 
 #endif

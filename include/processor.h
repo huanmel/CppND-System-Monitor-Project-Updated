@@ -7,7 +7,7 @@ class Processor {
 
   // DONE with static inside function: Declare any necessary private members
  private:
- float _utilization;
+  float _utilization;
 };
 
 #endif
