@@ -4,54 +4,38 @@
 
 // DONE: Return the aggregate CPU utilization
 float Processor::Utilization() {
-  static long previowait, previdle, prevuser, prevnice, prevsystem, previrq,
-      prevsoftirq, prevsteal;
+  // static long previowait, previdle, prevuser, prevnice, prevsystem, previrq,
+  // prevsoftirq, prevsteal;
   long iowait, idle, user, nice, system, irq, softirq, steal;
-  float PrevIdle, Idle, PrevNonIdle, NonIdle, PrevTotal, Total, totald, idled;
-  static bool IsInit = false;
+  // float PrevIdle, Idle, PrevNonIdle, NonIdle, PrevTotal, Total, totald,
+  // idled;
+  float Idle, NonIdle, Total, totald, idled;
+
   float procUtil = 0;
   std::vector<std::string> cpuUtil = LinuxParser::CpuUtilization();
-  user = std::stol(cpuUtil[0]);
-  nice = std::stol(cpuUtil[1]);
-  system = std::stol(cpuUtil[2]);
-  idle = std::stol(cpuUtil[3]);
-  iowait = std::stol(cpuUtil[4]);
-  irq = std::stol(cpuUtil[5]);
-  softirq = std::stol(cpuUtil[6]);
-  steal = std::stol(cpuUtil[7]);
-  // guest = std::stoi(cpuUtil[8]);
-  // guest_nice = std::stoi(cpuUtil[9]);
-  if (IsInit) {
-    PrevIdle = float(previdle + previowait);
-    Idle = idle + iowait;
-    PrevNonIdle =
-        prevuser + prevnice + prevsystem + previrq + prevsoftirq + prevsteal;
-    NonIdle = user + nice + system + irq + softirq + steal;
+  user = std::stol(cpuUtil[LinuxParser::CPUStates::kUser_]);
+  nice = std::stol(cpuUtil[LinuxParser::CPUStates::kNice_]);
+  system = std::stol(cpuUtil[LinuxParser::CPUStates::kSystem_]);
+  idle = std::stol(cpuUtil[LinuxParser::CPUStates::kIdle_]);
+  iowait = std::stol(cpuUtil[LinuxParser::CPUStates::kIOwait_]);
+  irq = std::stol(cpuUtil[LinuxParser::CPUStates::kIRQ_]);
+  softirq = std::stol(cpuUtil[LinuxParser::CPUStates::kSoftIRQ_]);
+  steal = std::stol(cpuUtil[LinuxParser::CPUStates::kSteal_]);
 
-    PrevTotal = PrevIdle + PrevNonIdle;
-    Total = Idle + NonIdle;
+  Idle = idle + iowait;
 
-    // #differentiate : actual value minus the previous one
-    totald = Total - PrevTotal;
-    idled = Idle - PrevIdle;
+  NonIdle = user + nice + system + irq + softirq + steal;
 
-    procUtil = float(totald - idled) / float(totald);
+  Total = Idle + NonIdle;
 
-  } else
-  // showing first time
-  {
-    procUtil = 0;
-  }
+  // #differentiate : actual value minus the previous one
+  totald = Total - _prevTotal;
+  idled = Idle - _prevIdle;
 
-  prevuser = user;
-  prevnice = nice;
-  prevsystem = system;
-  previdle = idle;
-  previowait = iowait;
-  previrq = irq;
-  prevsoftirq = softirq;
-  prevsteal = steal;
-  IsInit = true;
+  procUtil = float(totald - idled) / float(totald);
+
+  _prevIdle = idle;
+  _prevTotal = Total;
 
   _utilization = procUtil;
 
